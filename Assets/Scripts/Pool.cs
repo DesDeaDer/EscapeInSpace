@@ -1,61 +1,61 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
-using Object = UnityEngine.Object;
-
 //later can be rewrite on static Pool<T> with dynamic control attachment the objects
-public class Pool<T> : MonoBehaviour 
-	where T : MonoBehaviour
+public class Pool<T> : MonoBehaviour
+    where T : MonoBehaviour
 {
-	[SerializeField] private T _prototypeRef;
-	[SerializeField] private Transform _container;
+    #region Data
+#pragma warning disable 0649
 
-	Stack<T> _pool = new Stack<T>();
+    [SerializeField] private T _prototypeRef;
+    [SerializeField] private Transform _container;
 
-	public T Get()
-	{
-		T obj;
- 
-		if (!TryGet(out obj))
-		{
-			obj = Instantiate (_prototypeRef, _container, false);
-		}
+#pragma warning restore 0649
+    #endregion
 
-		return obj;
-	}
+    Stack<T> _pool = new Stack<T>();
 
-	public IEnumerable<T> GetAll()
-	{
-		var result = new T[_pool.Count];
-		var index = 0;
-		while (_pool.Count > 0)
-		{
-			TryGet(out result[index]);
+    public T Get()
+    {
+        if (!TryGet(out var obj))
+        {
+            obj = Instantiate(_prototypeRef, _container, false);
+        }
 
-			++index;
-		}
+        return obj;
+    }
 
-		return result;
-	}
+    public IEnumerable<T> GetAll()
+    {
+        var result = new T[_pool.Count];
+        var index = 0;
+        while (_pool.Count > 0)
+        {
+            TryGet(out result[index]);
 
-	public void Set(T obj)
-	{
-		obj.gameObject.SetActive(false);
-		_pool.Push(obj);
-	}
+            ++index;
+        }
 
-	private bool TryGet(out T result)
-	{
-		if (_pool.Count > 0)
-		{
-			result = _pool.Pop();
-			result.gameObject.SetActive (true);
-			return true;
-		}
+        return result;
+    }
 
-		result = null;
-		return false;
-	}
+    public void Set(T obj)
+    {
+        obj.gameObject.SetActive(false);
+        _pool.Push(obj);
+    }
 
+    private bool TryGet(out T result)
+    {
+        if (_pool.Count > 0)
+        {
+            result = _pool.Pop();
+            result.gameObject.SetActive(true);
+            return true;
+        }
+
+        result = null;
+        return false;
+    }
 }

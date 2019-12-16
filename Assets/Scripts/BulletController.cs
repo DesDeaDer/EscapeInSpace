@@ -1,50 +1,52 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BulletController : MonoBehaviour
 {
-	[SerializeField] private PoolBullets _poolBullets;
-	[SerializeField] private CameraInfo _cameraInfo;
-	[SerializeField] private Bullet _bullet;
-	[SerializeField] private float _offsetBorder;
+    #region Data
+#pragma warning disable 0649
 
-	private Vector3 _positionTarget;
-	private float _speed;
+    [SerializeField] private PoolBullets _poolBullets;
+    [SerializeField] private CameraInfo _cameraInfo;
+    [SerializeField] private Bullet _bullet;
+    [SerializeField] private float _offsetBorder;
 
-	public void Shoot(Vector3 pos, Vector3 dir, float speed)
-	{
-		_bullet.Position = pos;
+#pragma warning restore 0649
+    #endregion
 
-		//lenth of [leftdown, rigthup]
-		var length = Mathf.Sqrt ((_cameraInfo.Rigth - _cameraInfo.Left) * (_cameraInfo.Rigth - _cameraInfo.Left) + (_cameraInfo.Up - _cameraInfo.Down) * (_cameraInfo.Up - _cameraInfo.Down));
+    private Vector3 _positionTarget;
+    private float _speed;
 
-		var posEnd = pos + dir * length;
+    public void Shoot(Vector3 pos, Vector3 dir, float speed)
+    {
+        _bullet.Position = pos;
 
-		var start = Vector2.Min(pos, posEnd);
-		var end = Vector2.Max(pos, posEnd);
+        //lenth of [leftdown, rigthup]
+        var length = Mathf.Sqrt((_cameraInfo.Rigth - _cameraInfo.Left) * (_cameraInfo.Rigth - _cameraInfo.Left) + (_cameraInfo.Up - _cameraInfo.Down) * (_cameraInfo.Up - _cameraInfo.Down));
 
-		var leftUp = new Vector2 (_cameraInfo.Left - _offsetBorder, _cameraInfo.Up + _offsetBorder);
-		var leftDown = new Vector2 (_cameraInfo.Left - _offsetBorder, _cameraInfo.Down - _offsetBorder);
-		var RigthDown = new Vector2 (_cameraInfo.Rigth + _offsetBorder, _cameraInfo.Down - _offsetBorder);
-		var RigthUp = new Vector2 (_cameraInfo.Rigth + _offsetBorder, _cameraInfo.Up + _offsetBorder);
+        var posEnd = pos + dir * length;
 
-		Vector2 pointIntersect;
-		if
-		(
-				intersection(start, end, leftUp, RigthUp, out pointIntersect) ||
-				intersection(start, end, leftDown, RigthDown, out pointIntersect) ||
-				intersection(start, end, leftUp, leftUp, out pointIntersect) ||
-				intersection(start, end, RigthUp, RigthUp, out pointIntersect)
-		)
-		{
-			_positionTarget = pointIntersect;
-			_speed = speed;
-		}
+        var start = Vector2.Min(pos, posEnd);
+        var end = Vector2.Max(pos, posEnd);
 
-	}
+        var leftUp = new Vector2(_cameraInfo.Left - _offsetBorder, _cameraInfo.Up + _offsetBorder);
+        var leftDown = new Vector2(_cameraInfo.Left - _offsetBorder, _cameraInfo.Down - _offsetBorder);
+        var RigthDown = new Vector2(_cameraInfo.Rigth + _offsetBorder, _cameraInfo.Down - _offsetBorder);
+        var RigthUp = new Vector2(_cameraInfo.Rigth + _offsetBorder, _cameraInfo.Up + _offsetBorder);
 
-	private bool intersection(Vector2 start1, Vector2 end1, Vector2 start2, Vector2 end2, out Vector2 result)
+        if
+        (
+                Intersection(start, end, leftUp, RigthUp, out var pointIntersect) ||
+                Intersection(start, end, leftDown, RigthDown, out pointIntersect) ||
+                Intersection(start, end, leftUp, leftUp, out pointIntersect) ||
+                Intersection(start, end, RigthUp, RigthUp, out pointIntersect)
+        )
+        {
+            _positionTarget = pointIntersect;
+            _speed = speed;
+        }
+    }
+
+    private bool Intersection(Vector2 start1, Vector2 end1, Vector2 start2, Vector2 end2, out Vector2 result)
     {
         var dir1 = end1 - start1;
         var dir2 = end2 - start2;
@@ -63,52 +65,50 @@ public class BulletController : MonoBehaviour
         var seg2_line1_start = a1 * start2.x + b1 * start2.y + d1;
         var seg2_line1_end = a1 * end2.x + b1 * end2.y + d1;
 
-		if (seg1_line2_start * seg1_line2_end >= 0 || seg2_line1_start * seg2_line1_end >= 0)
-		{
-			result = Vector2.zero;
-			return false;
-		}
+        if (seg1_line2_start * seg1_line2_end >= 0 || seg2_line1_start * seg2_line1_end >= 0)
+        {
+            result = Vector2.zero;
+            return false;
+        }
 
         var u = seg1_line2_start / (seg1_line2_start - seg1_line2_end);
-		result =  start1 + u * dir1;
+        result = start1 + u * dir1;
 
         return true;
     }
 
-	private void Update()
-	{
-		MoveProcessing();
-	}
+    private void Update()
+    {
+        MoveProcessing();
+    }
 
-	private void MoveProcessing()
-	{
-		var position = _bullet.Position;
+    private void MoveProcessing()
+    {
+        var position = _bullet.Position;
+        var distanceVector = _positionTarget - position;
+        var speed = distanceVector.normalized * (_speed * Time.deltaTime);
+        var distanceSqr = distanceVector.sqrMagnitude;
+        var speedSqr = speed.sqrMagnitude;
 
-		var distanceVector = _positionTarget - position;
-		var speed = distanceVector.normalized * (_speed * Time.deltaTime);
+        if (speedSqr > distanceSqr)
+        {
+            position = _positionTarget;
+        }
+        else
+        {
+            position += speed;
+        }
 
-		var distanceSqr = distanceVector.sqrMagnitude;
-		var speedSqr = speed.sqrMagnitude;
+        _bullet.Position = position;
 
-		if (speedSqr > distanceSqr)
-		{
-			position = _positionTarget;
-		}
-		else
-		{
-			position += speed;
-		}
+        if (position == _positionTarget)
+        {
+            _poolBullets.Set(this);
+        }
+    }
 
-		_bullet.Position = position;
-
-		if (position == _positionTarget) 
-		{
-			_poolBullets.Set(this);
-		}
-	}
-
-	private void OnCollisionEnter2D(Collision2D coll) 
-	{
-		_poolBullets.Set(this);
-	}
+    private void OnCollisionEnter2D(Collision2D coll)
+    {
+        _poolBullets.Set(this);
+    }
 }

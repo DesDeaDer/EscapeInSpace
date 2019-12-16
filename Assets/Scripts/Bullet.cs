@@ -1,19 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class Bullet : MonoBehaviour 
+public class Bullet : MonoBehaviour
 {
-	public Vector3 Position
-	{
-		get 
-		{
-			return transform.position;
-		}
-		set
-		{
-			transform.position = value;
-		}
-	}
+    public Vector3 Position
+    {
+        get => transform.position;
+        set => transform.position = value;
+    }
 }
-

@@ -1,203 +1,193 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
-using System.Linq;
 using UnityEngine.SceneManagement;
-using System;
 
-public class Level : MonoBehaviour 
+public class Level : MonoBehaviour
 {
-	[SerializeField] private TimerView _timerView;
-	[SerializeField] private WinView _winView;
-	[SerializeField] private LoseView _loseView;
-	[SerializeField] private EnemiesGroupController _enemiesGroupController;
-	[SerializeField] private MotherEnemiesSpawnController _motherEnemiesSpawnController;
-	[SerializeField] private ShipController _shipController;
-	[SerializeField] private BulletsReseter _reseterBulletsShip;
-	[SerializeField] private BulletsReseter _reseterBulletsEnemy;
-	[SerializeField] private int _health;
+    #region Data
+#pragma warning disable 0649
 
-	private int _healthCurrent;
-	private int _score;
+    [SerializeField] private TimerView _timerView;
+    [SerializeField] private WinView _winView;
+    [SerializeField] private LoseView _loseView;
+    [SerializeField] private EnemiesGroupController _enemiesGroupController;
+    [SerializeField] private MotherEnemiesSpawnController _motherEnemiesSpawnController;
+    [SerializeField] private ShipController _shipController;
+    [SerializeField] private BulletsReseter _reseterBulletsShip;
+    [SerializeField] private BulletsReseter _reseterBulletsEnemy;
+    [SerializeField] private int _health;
 
-	public event Action<int> OnChangeHealth;
-	public event Action<int> OnChangeScore;
+#pragma warning restore 0649
+    #endregion
 
-	public int Health
-	{
-		get
-		{
-			return _healthCurrent;
-		}
-		private set
-		{
-			_healthCurrent = value;
+    private int _healthCurrent;
+    private int _score;
 
-			if (OnChangeHealth != null)
-			{
-				OnChangeHealth(_healthCurrent);
-			}
-		}
+    public event Action<int> OnChangeHealth;
+    public event Action<int> OnChangeScore;
 
-	}
+    public int Health
+    {
+        get => _healthCurrent;
+        private set
+        {
+            _healthCurrent = value;
 
-	public int Score
-	{
-		get
-		{
-			return _score;
-		}
-		private set 
-		{
-			_score = value;
+            OnChangeHealth?.Invoke(_healthCurrent);
+        }
+    }
 
-			if (OnChangeScore != null)
-			{
-				OnChangeScore(_score);
-			}
-		}
-	}
+    public int Score
+    {
+        get => _score;
+        private set
+        {
+            _score = value;
 
-	public void GoMainMenu()
-	{
-		SceneManager.LoadScene(0);
-	}
+            OnChangeScore?.Invoke(_score);
+        }
+    }
 
-	public void Reload()
-	{
-		SceneManager.LoadScene(1);
-	}
+    public void GoMainMenu()
+    {
+        SceneManager.LoadScene(0);
+    }
 
-	private void OnEnable()
-	{
-		Health = _health;
-	}
+    public void Reload()
+    {
+        SceneManager.LoadScene(1);
+    }
 
-	private void Start()
-	{
-		DeactivateController(_enemiesGroupController);
-		DeactivateController(_motherEnemiesSpawnController);
-		DeactivateController(_shipController);
+    private void OnEnable()
+    {
+        Health = _health;
+    }
 
-		ActivateController(_timerView);
+    private void Start()
+    {
+        DeactivateController(_enemiesGroupController);
+        DeactivateController(_motherEnemiesSpawnController);
+        DeactivateController(_shipController);
 
-		_timerView.OnEnd += OnEndTimerViewHandler;
-		_timerView.StartTimer();
-		_timerView.Show();
-	}
+        ActivateController(_timerView);
 
-	private void OnEndTimerViewHandler()
-	{
-		_timerView.OnEnd -= OnEndTimerViewHandler;
-		_timerView.StopTimer();
-		_timerView.Hide();
-		StartGame();
-	}
+        _timerView.OnEnd += OnEndTimerViewHandler;
+        _timerView.StartTimer();
+        _timerView.Show();
+    }
 
-	private void StartGame()
-	{
-		ActivateController(_enemiesGroupController);
-		ActivateController(_motherEnemiesSpawnController);
-		ActivateController(_shipController);
+    private void OnEndTimerViewHandler()
+    {
+        _timerView.OnEnd -= OnEndTimerViewHandler;
+        _timerView.StopTimer();
+        _timerView.Hide();
+        StartGame();
+    }
 
-		_enemiesGroupController.OnDead += OnDeadEnemyHandler;
-		_enemiesGroupController.OnAllDead += OnAllDeadEnemiesHandler;
+    private void StartGame()
+    {
+        ActivateController(_enemiesGroupController);
+        ActivateController(_motherEnemiesSpawnController);
+        ActivateController(_shipController);
 
-		_motherEnemiesSpawnController.OnDead += OnDeadMotherEnemyHandler;
+        _enemiesGroupController.OnDead += OnDeadEnemyHandler;
+        _enemiesGroupController.OnAllDead += OnAllDeadEnemiesHandler;
 
-		_shipController.OnDead += OnDeadShipHandler;
-	}
+        _motherEnemiesSpawnController.OnDead += OnDeadMotherEnemyHandler;
 
-	private void OnDeadShipHandler()
-	{
-		_shipController.OnDead -= OnDeadShipHandler;
+        _shipController.OnDead += OnDeadShipHandler;
+    }
 
-		DeactivateController(_enemiesGroupController);
-		DeactivateController(_motherEnemiesSpawnController);
-		DeactivateController(_shipController);
+    private void OnDeadShipHandler()
+    {
+        _shipController.OnDead -= OnDeadShipHandler;
 
-		--Health;
+        DeactivateController(_enemiesGroupController);
+        DeactivateController(_motherEnemiesSpawnController);
+        DeactivateController(_shipController);
 
-		if (_healthCurrent > 0)
-		{
-			Restart();
-		}
-		else
-		{
-			Reset();
-			_loseView.Show();
-		}
-	}
+        --Health;
 
-	private void OnDeadEnemyHandler(EnemyController obj)
-	{
-		Score += obj.ScoreCost;
-	}
+        if (_healthCurrent > 0)
+        {
+            Restart();
+        }
+        else
+        {
+            Reset();
+            _loseView.Show();
+        }
+    }
 
-	private void OnDeadMotherEnemyHandler(MotherEnemyController obj)
-	{
-		Score += obj.ScoreCost;
-	}
+    private void OnDeadEnemyHandler(EnemyController obj)
+    {
+        Score += obj.ScoreCost;
+    }
 
-	private void OnAllDeadEnemiesHandler()
-	{
-		DeactivateController(_enemiesGroupController);
-		DeactivateController(_motherEnemiesSpawnController);
+    private void OnDeadMotherEnemyHandler(MotherEnemyController obj)
+    {
+        Score += obj.ScoreCost;
+    }
 
-		if (_motherEnemiesSpawnController.Count > 0)
-		{
-			_motherEnemiesSpawnController.OnAllDead += OnAllDeadMotherEnemiesHandler;
-		}
-		else
-		{
-			OnAllDeadMotherEnemiesHandler();
-		}
-	}
+    private void OnAllDeadEnemiesHandler()
+    {
+        DeactivateController(_enemiesGroupController);
+        DeactivateController(_motherEnemiesSpawnController);
 
-	private void OnAllDeadMotherEnemiesHandler()
-	{
-		DeactivateController(_enemiesGroupController);
-		DeactivateController(_motherEnemiesSpawnController);
-		DeactivateController(_shipController);
+        if (_motherEnemiesSpawnController.Count > 0)
+        {
+            _motherEnemiesSpawnController.OnAllDead += OnAllDeadMotherEnemiesHandler;
+        }
+        else
+        {
+            OnAllDeadMotherEnemiesHandler();
+        }
+    }
 
-		_winView.Show();
-	}
+    private void OnAllDeadMotherEnemiesHandler()
+    {
+        DeactivateController(_enemiesGroupController);
+        DeactivateController(_motherEnemiesSpawnController);
+        DeactivateController(_shipController);
 
-	private void Reset()
-	{
-		_enemiesGroupController.OnDead -= OnDeadEnemyHandler;
-		_enemiesGroupController.OnAllDead -= OnAllDeadEnemiesHandler;
-		_motherEnemiesSpawnController.OnDead -= OnDeadMotherEnemyHandler;
-		_motherEnemiesSpawnController.OnAllDead -= OnAllDeadEnemiesHandler;
-		_shipController.OnDead -= OnDeadShipHandler;
+        _winView.Show();
+    }
 
-		_reseterBulletsShip.Reset();
-		_reseterBulletsEnemy.Reset();
-		_enemiesGroupController.Reset();
-		_motherEnemiesSpawnController.Reset();
-		_shipController.Reset();
-	}
+    private void Reset()
+    {
+        _enemiesGroupController.OnDead -= OnDeadEnemyHandler;
+        _enemiesGroupController.OnAllDead -= OnAllDeadEnemiesHandler;
+        _motherEnemiesSpawnController.OnDead -= OnDeadMotherEnemyHandler;
+        _motherEnemiesSpawnController.OnAllDead -= OnAllDeadEnemiesHandler;
+        _shipController.OnDead -= OnDeadShipHandler;
 
-	private void Restart()
-	{
-		Reset();
-		Start();
-	}
+        _reseterBulletsShip.Reset();
+        _reseterBulletsEnemy.Reset();
+        _enemiesGroupController.Reset();
+        _motherEnemiesSpawnController.Reset();
+        _shipController.Reset();
+    }
 
-	private void ActivateController(MonoBehaviour obj)
-	{
-		if (!obj.enabled)
-		{
-			obj.enabled = true;
-		}
-	}
+    private void Restart()
+    {
+        Reset();
+        Start();
+    }
 
-	private void DeactivateController(MonoBehaviour obj)
-	{
-		if (obj.enabled)
-		{
-			obj.enabled = false;
-		}
-	}
+    private void ActivateController(MonoBehaviour obj)
+    {
+        if (!obj.enabled)
+        {
+            obj.enabled = true;
+        }
+    }
+
+    private void DeactivateController(MonoBehaviour obj)
+    {
+        if (obj.enabled)
+        {
+            obj.enabled = false;
+        }
+    }
 
 }

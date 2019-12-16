@@ -1,17 +1,21 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class BulletsReseter : MonoBehaviour
 {
-	[SerializeField] private PoolBullets _pool;
+    #region Data
+#pragma warning disable 0649
 
-	public void Reset()
-	{
-		var bulletsShip = GetComponentsInChildren<BulletController>();
-		foreach (var item in bulletsShip) 
-		{
-			_pool.Set(item);
-		}
-	}
+    [SerializeField] private PoolBullets _pool;
+
+#pragma warning restore 0649
+    #endregion
+
+    public void Reset()
+    {
+        var bulletsShip = GetComponentsInChildren<BulletController>();
+        foreach (var item in bulletsShip)
+        {
+            _pool.Set(item);
+        }
+    }
 }

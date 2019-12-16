@@ -1,59 +1,54 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
-using System;
 using UnityEngine.UI;
 
 public class TimerView : View
 {
-	public const int COUNT_DIGIT = 3;
-	public const float TIME_ON_DIGIT = 1.0f;
+    public const int COUNT_DIGIT = 3;
+    public const float TIME_ON_DIGIT = 1.0f;
 
-	[SerializeField] private Animator _animator;
-	[SerializeField] private Text _text;
+    #region Data
+#pragma warning disable 0649
 
-	private string Text
-	{
-		set
-		{
-			_text.text = value;
-		}
-	}
+    [SerializeField] private Animator _animator;
+    [SerializeField] private Text _text;
 
-	public event Action OnEnd;
+#pragma warning restore 0649
+    #endregion
 
-	private float _timeDalay;
+    private void SetText(string value) => _text.text = value;
 
-	public void StartTimer()
-	{
-		_animator.enabled = true;
-		_timeDalay = COUNT_DIGIT * TIME_ON_DIGIT;
-	}
+    public event Action OnEnd;
 
-	public void StopTimer()
-	{
-		_animator.enabled = false;
-	}
+    private float _timeDalay;
 
-	private void LateUpdate()
-	{
-		if (_timeDalay > 0)
-		{
-			_timeDalay -= Time.deltaTime;
-			Text = ((int)(_timeDalay / TIME_ON_DIGIT) + 1).ToString();
-		}
-		if (_timeDalay < 0) 
-		{
-			_timeDalay = 0;
-			End();
-		}
-	}
+    public void StartTimer()
+    {
+        _animator.enabled = true;
+        _timeDalay = COUNT_DIGIT * TIME_ON_DIGIT;
+    }
 
-	private void End()
-	{
-		if (OnEnd != null)
-		{
-			OnEnd();
-		}
-	}
+    public void StopTimer()
+    {
+        _animator.enabled = false;
+    }
+
+    private void LateUpdate()
+    {
+        if (_timeDalay > 0)
+        {
+            _timeDalay -= Time.deltaTime;
+            SetText(((int)(_timeDalay / TIME_ON_DIGIT) + 1).ToString());
+        }
+        if (_timeDalay < 0)
+        {
+            _timeDalay = 0;
+            End();
+        }
+    }
+
+    private void End()
+    {
+        OnEnd?.Invoke();
+    }
 }

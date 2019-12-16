@@ -1,37 +1,34 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class StatisticView : View
 {
-	[SerializeField] private Text _healthText;
-	[SerializeField] private Text _ScoreText;
-	[SerializeField] private Level _level;
+    #region Data
+#pragma warning disable 0649
 
-	private void OnEnable()
-	{
-		_level.OnChangeHealth += OnChangeHealth;
-		_level.OnChangeScore += OnChangeScore;
+    [SerializeField] private Text _healthText;
+    [SerializeField] private Text _ScoreText;
+    [SerializeField] private Level _level;
 
-		OnChangeScore(_level.Score);
-		OnChangeHealth(_level.Health);
-	}
+#pragma warning restore 0649
+    #endregion
 
-	private void OnDisable()
-	{
-		_level.OnChangeHealth -= OnChangeHealth;
-		_level.OnChangeScore -= OnChangeScore;
+    private void OnEnable()
+    {
+        _level.OnChangeHealth += OnChangeHealth;
+        _level.OnChangeScore += OnChangeScore;
 
-	}
+        OnChangeScore(_level.Score);
+        OnChangeHealth(_level.Health);
+    }
 
-	private void OnChangeScore (int value)
-	{
-		_ScoreText.text = "Score: " + value;
-	}
+    private void OnDisable()
+    {
+        _level.OnChangeHealth -= OnChangeHealth;
+        _level.OnChangeScore -= OnChangeScore;
 
-	private void OnChangeHealth (int value)
-	{
-		_healthText.text = "Health: " + value;
-	}
+    }
+
+    private void OnChangeScore(int value) => _ScoreText.text = "Score: " + value;
+    private void OnChangeHealth(int value) => _healthText.text = "Health: " + value;
 }

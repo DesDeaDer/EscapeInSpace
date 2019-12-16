@@ -1,125 +1,107 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using System;
+using UnityEngine;
 
 public class ShipController : MonoBehaviour
 {
-	[SerializeField] private Ship _ship;
-	[SerializeField] private PoolBullets _bullets;
-	[SerializeField] private CameraInfo _camera;
-	[SerializeField] private float _offsetFromBorder;
+    #region Data
+#pragma warning disable 0649
 
-	public event Action OnDead;
+    [SerializeField] private Ship _ship;
+    [SerializeField] private PoolBullets _bullets;
+    [SerializeField] private CameraInfo _camera;
+    [SerializeField] private float _offsetFromBorder;
 
-	private float _rechargeDelay;
-	private Vector3 _positionStart;
+#pragma warning restore 0649
+    #endregion
 
-	public bool IsCanShoot
-	{
-		get
-		{
-			return _rechargeDelay == 0;
-		}
-	}
+    public event Action OnDead;
 
-	public void Reset()
-	{
-		_ship.Position = _positionStart;
-	}
+    private float _rechargeDelay;
+    private Vector3 _positionStart;
 
-	private void OnEnable()
-	{
-		_positionStart = _ship.Position;
-	}
+    public bool IsCanShoot => _rechargeDelay == 0;
 
-	private void Update()
-	{
-		RechargeProcessing();
+    public void Reset()
+    {
+        _ship.Position = _positionStart;
+    }
 
-		if (ShootProcessing()) 
-		{
-			ShootRecharge();
-		}
+    private void OnEnable()
+    {
+        _positionStart = _ship.Position;
+    }
 
-		MoveProcessing();
-	}
+    private void Update()
+    {
+        RechargeProcessing();
 
-	private void OnCollisionEnter2D(Collision2D coll) 
-	{
-		Dead();
-	}
+        if (ShootProcessing())
+        {
+            ShootRecharge();
+        }
 
-	private void RechargeProcessing()
-	{
-		if (_rechargeDelay > 0) 
-		{
-			_rechargeDelay -= Time.deltaTime;
-		}
-		if (_rechargeDelay < 0) 
-		{
-			_rechargeDelay = 0;
-		}
-	}
+        MoveProcessing();
+    }
 
-	private void ShootRecharge()
-	{
-		_rechargeDelay = _ship.ShootRechargeTime;
-	}
+    private void OnCollisionEnter2D(Collision2D coll)
+    {
+        Dead();
+    }
 
-	private bool ShootProcessing()
-	{
-		if (IsCanShoot && Input.GetKey (KeyCode.Space)) 
-		{
-			Shoot();
-			return true;
-		}
+    private void RechargeProcessing()
+    {
+        if (_rechargeDelay > 0)
+        {
+            _rechargeDelay -= Time.deltaTime;
+        }
+        if (_rechargeDelay < 0)
+        {
+            _rechargeDelay = 0;
+        }
+    }
 
-		return false;
-	}
+    private void ShootRecharge() => _rechargeDelay = _ship.ShootRechargeTime;
+    private void Shoot() => _bullets.Get().Shoot(_ship.PivotBulletPosition, _ship.PivotBulletDirection, _ship.SpeedBullet);
 
-	private void Shoot()
-	{
-		_bullets.Get().Shoot(_ship.PivotBulletPosition, _ship.PivotBulletDirection, _ship.SpeedBullet); 
-	}
+    private bool ShootProcessing()
+    {
+        if (IsCanShoot && Input.GetKey(KeyCode.Space))
+        {
+            Shoot();
+            return true;
+        }
 
-	private void MoveProcessing()
-	{
-		var left = _camera.Left + _offsetFromBorder;
-		var rigth = _camera.Rigth - _offsetFromBorder;
+        return false;
+    }
 
-		var position = _ship.Position;
-		
-		position += CollectMove();
-		position.x = Mathf.Clamp (position.x, left, rigth);
+    private void MoveProcessing()
+    {
+        var left = _camera.Left + _offsetFromBorder;
+        var rigth = _camera.Rigth - _offsetFromBorder;
 
-		_ship.Position = position;
-	}
+        var position = _ship.Position;
 
-	private Vector3 CollectMove()
-	{
-		var deltaPosition  = Vector3.zero;
-		if (Input.GetKey (KeyCode.LeftArrow))
-		{
-			deltaPosition += GetSpeedFromDirection(-transform.right);
-		}
-		if (Input.GetKey (KeyCode.RightArrow))
-		{
-			deltaPosition += GetSpeedFromDirection(transform.right);
-		}
-		return deltaPosition;
-	}
+        position += CollectMove();
+        position.x = Mathf.Clamp(position.x, left, rigth);
 
-	private Vector3 GetSpeedFromDirection(Vector3 dir)
-	{
-		return  dir * (_ship.Speed * Time.deltaTime);
-	}
-	
-	private void Dead()
-	{
-		if (OnDead != null)
-		{
-			OnDead();
-		}
-	}
+        _ship.Position = position;
+    }
+
+    private Vector3 CollectMove()
+    {
+        var deltaPosition = Vector3.zero;
+        if (Input.GetKey(KeyCode.LeftArrow))
+        {
+            deltaPosition += GetSpeedFromDirection(-transform.right);
+        }
+        if (Input.GetKey(KeyCode.RightArrow))
+        {
+            deltaPosition += GetSpeedFromDirection(transform.right);
+        }
+        return deltaPosition;
+    }
+
+    private Vector3 GetSpeedFromDirection(Vector3 dir) => dir * (_ship.Speed * Time.deltaTime);
+
+    private void Dead() => OnDead?.Invoke();
 }

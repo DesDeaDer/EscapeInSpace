@@ -1,55 +1,25 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class Enemy : MonoBehaviour 
+public class Enemy : MonoBehaviour
 {
-	[SerializeField] private Transform _pivotBulletStart;
-	[SerializeField] private int _costScore;
-	[SerializeField] private int _costShootScore;
+    #region Data
+#pragma warning disable 0649
 
-	public int CostScore
-	{
-		get
-		{
-			return _costScore;
-		}
-	}
+    [SerializeField] private Transform _pivotBulletStart;
+    [SerializeField] private int _costScore;
+    [SerializeField] private int _costShootScore;
 
-	public int CostShootScore
-	{
-		get
-		{
-			return _costShootScore;
-		}
-	}
+#pragma warning restore 0649
+    #endregion
 
-	public Vector3 PivotBulletPosition
-	{
-		get
-		{
-			return _pivotBulletStart.position;
-		}
-	}
+    public int CostScore => _costScore;
+    public int CostShootScore => _costShootScore;
+    public Vector3 PivotBulletPosition => _pivotBulletStart.position;
+    public Vector3 PivotBulletDirection => _pivotBulletStart.up;
 
-	public Vector3 PivotBulletDirection
-	{
-		get
-		{
-			return _pivotBulletStart.up;
-		}
-	}
-
-	public Vector3 Position 
-	{
-		get 
-		{
-			return transform.position;
-		}
-		set
-		{
-			transform.position = value;
-		}
-	}
+    public Vector3 Position
+    {
+        get => transform.position;
+        set => transform.position = value;
+    }
 }
-

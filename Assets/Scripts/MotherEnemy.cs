@@ -1,82 +1,31 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MotherEnemy : MonoBehaviour
 {
-	[SerializeField] private Transform _pivotBulletStart;
-	[SerializeField] private int _costScore;
-	[SerializeField] float _speedMove;
-	[SerializeField] float _speedBulletMove;
-	[SerializeField] float _shootRechargeTime;
-	[SerializeField] float _shootRechargeStartTime;
+    #region Data
+#pragma warning disable 0649
 
-	public int CostScore
-	{
-		get
-		{
-			return _costScore;
-		}
-	}
+    [SerializeField] private Transform _pivotBulletStart;
+    [SerializeField] private int _costScore;
+    [SerializeField] float _speedMove;
+    [SerializeField] float _speedBulletMove;
+    [SerializeField] float _shootRechargeTime;
+    [SerializeField] float _shootRechargeStartTime;
 
-	public float SpeedMove
-	{
-		get
-		{
-			return _speedMove;
-		}
-	}
+#pragma warning restore 0649
+    #endregion
 
-	public float SpeedBulletMove
-	{
-		get
-		{
-			return _speedBulletMove;
-		}
-	}
+    public int CostScore => _costScore;
+    public float SpeedMove => _speedMove;
+    public float SpeedBulletMove => _speedBulletMove;
+    public float ShootRechargeTime => _shootRechargeTime;
+    public float ShootRechargeStartTime => _shootRechargeStartTime;
+    public Vector3 PivotBulletPosition => _pivotBulletStart.position;
+    public Vector3 PivotBulletDirection => _pivotBulletStart.up;
 
-	public Vector3 PivotBulletPosition
-	{
-		get
-		{
-			return _pivotBulletStart.position;
-		}
-	}
-
-	public Vector3 PivotBulletDirection
-	{
-		get
-		{
-			return _pivotBulletStart.up;
-		}
-	}
-
-	public Vector3 Position 
-	{
-		get 
-		{
-			return transform.position;
-		}
-		set
-		{
-			transform.position = value;
-		}
-	}
-
-	public float ShootRechargeTime
-	{
-		get
-		{
-			return _shootRechargeTime;
-		}
-	}
-
-	public float ShootRechargeStartTime
-	{
-		get
-		{
-			return _shootRechargeStartTime;
-		}
-	}
-
+    public Vector3 Position
+    {
+        get => transform.position;
+        set => transform.position = value;
+    }
 }
